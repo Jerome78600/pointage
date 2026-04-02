@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pointage — Quadra Terra & CKOM9</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --qt:#185FA5;--qt-l:#E6F1FB;--qt-d:#0C447C;
+  --ck:#3B6D11;--ck-l:#EAF3DE;--ck-d:#1A4A05;
+  --red:#A32D2D;--red-l:#FCEBEB;
+  --amb:#BA7517;--amb-l:#FAEEDA;
+  --pur:#534AB7;--pur-l:#EEEDFE;
+  --bd:#D3D1C7;--bg:#F5F4F0;--white:#fff;--dark:#1A1A1A;--muted:#5F5E5A;
+  --r:10px;--rs:6px;
+}
+body{font-family:Arial,sans-serif;background:var(--bg);color:var(--dark);font-size:13px;min-height:100vh;}
+.hidden{display:none!important;}
+
+/* LOGIN */
+#screen-login{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:16px;}
+.login-logo{display:flex;gap:8px;margin-bottom:4px;}
+.logo{padding:5px 10px;border-radius:5px;font-weight:700;font-size:12px;letter-spacing:.05em;color:#fff;}
+.logo-qt{background:var(--qt);}.logo-ck{background:var(--ck);}
+.login-box{background:var(--white);border:1px solid var(--bd);border-radius:var(--r);padding:24px;width:340px;}
+.login-title{font-size:15px;font-weight:700;margin-bottom:4px;}
+.login-sub{font-size:11px;color:var(--muted);margin-bottom:16px;}
+.ms-btn{width:100%;display:flex;align-items:center;justify-content:center;gap:10px;padding:11px;border:1.5px solid var(--bd);border-radius:var(--rs);background:var(--white);cursor:pointer;font-size:13px;font-weight:600;color:var(--dark);transition:all .15s;margin-bottom:12px;}
+.ms-btn:hover{border-color:var(--qt);background:var(--qt-l);color:var(--qt);}
+.ms-btn:disabled{opacity:.5;cursor:not-allowed;}
+.sep-or{text-align:center;color:var(--muted);font-size:11px;margin:4px 0 12px;position:relative;}
+.sep-or::before,.sep-or::after{content:'';position:absolute;top:50%;width:42%;height:1px;background:var(--bd);}
+.sep-or::before{left:0;}.sep-or::after{right:0;}
+.admin-row{display:flex;gap:6px;}
+.inp{flex:1;padding:7px 10px;border:1px solid var(--bd);border-radius:var(--rs);font-size:12px;background:var(--white);color:var(--dark);}
+.btn{padding:7px 14px;border-radius:var(--rs);border:none;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;}
+.btn-qt{background:var(--qt);color:#fff;}.btn-qt:hover{background:var(--qt-d);}
+.btn-ck{background:var(--ck);color:#fff;}
+.btn-red{background:var(--red);color:#fff;}
+.btn-muted{background:var(--bg);color:var(--muted);border:1px solid var(--bd);}
+.btn-muted:hover{background:var(--bd);}
+.err{color:var(--red);font-size:11px;margin-top:6px;}
+
+/* APP */
+#screen-app{display:none;flex-direction:column;min-height:100vh;}
+.topbar{background:var(--white);border-bottom:1px solid var(--bd);padding:10px 16px;display:flex;align-items:center;justify-content:space-between;}
+.topbar-left{display:flex;align-items:center;gap:10px;}
+.topbar-user{font-size:13px;font-weight:600;color:var(--qt);}
+.topbar-date{font-size:11px;color:var(--muted);}
+.sync-dot{width:8px;height:8px;border-radius:50%;background:var(--bd);transition:background .4s;}
+.sync-dot.ok{background:#3B6D11;}
+.sync-dot.err{background:var(--red);}
+.sync-dot.sync{background:var(--amb);animation:pulse 1s infinite;}
+.sync-lbl{font-size:10px;color:var(--muted);}
+.logout-btn{font-size:11px;padding:4px 10px;border:1px solid var(--bd);border-radius:99px;background:none;cursor:pointer;color:var(--muted);}
+.nav{display:flex;background:var(--white);border-bottom:1px solid var(--bd);padding:0 16px;overflow-x:auto;}
+.nav-btn{padding:9px 14px;font-size:12px;font-weight:500;border:none;background:none;cursor:pointer;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;}
+.nav-btn.active{color:var(--qt);border-bottom-color:var(--qt);}
+.content{padding:14px;flex:1;max-width:1000px;margin:0 auto;width:100%;}
+.panel{display:none;}.panel.active{display:block;}
+
+.card{background:var(--white);border:1px solid var(--bd);border-radius:var(--r);padding:14px;margin-bottom:12px;}
+.card-title{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px;}
+
+.chrono-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
+.chrono-card{border-radius:var(--r);padding:16px;border:2px solid transparent;}
+.cqt{background:var(--qt-l);border-color:var(--qt);}.cck{background:var(--ck-l);border-color:var(--ck);}
+.inactive{opacity:.4;}
+.ch-label{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px;}
+.cqt .ch-label{color:var(--qt-d);}.cck .ch-label{color:var(--ck-d);}
+.ch-time{font-size:34px;font-weight:700;font-variant-numeric:tabular-nums;margin-bottom:10px;}
+.cqt .ch-time{color:var(--qt);}.cck .ch-time{color:var(--ck);}
+.ch-btn{width:100%;padding:9px;border-radius:var(--rs);border:none;font-size:12px;font-weight:600;cursor:pointer;}
+
+.act-bar{height:16px;border-radius:99px;background:var(--bg);overflow:hidden;display:flex;margin:8px 0;border:1px solid var(--bd);}
+.seg-qt{background:var(--qt);height:100%;transition:width .4s;}
+.seg-ck{background:var(--ck);height:100%;transition:width .4s;}
+.bar-legend{display:flex;gap:14px;font-size:11px;color:var(--muted);}
+.ldot{width:9px;height:9px;border-radius:2px;display:inline-block;margin-right:3px;vertical-align:middle;}
+
+.sess-list{display:flex;flex-direction:column;gap:5px;max-height:200px;overflow-y:auto;}
+.sess-row{display:flex;align-items:center;gap:8px;padding:7px 9px;border-radius:var(--rs);border:1px solid var(--bd);background:var(--bg);font-size:11px;}
+.sbadge{font-size:10px;font-weight:700;padding:2px 6px;border-radius:99px;flex-shrink:0;}
+.bqt{background:var(--qt-l);color:var(--qt-d);}.bck{background:var(--ck-l);color:var(--ck-d);}
+.sdel{border:none;background:none;color:var(--bd);cursor:pointer;font-size:14px;padding:0 3px;margin-left:auto;}
+.sdel:hover{color:var(--red);}
+
+.metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:12px;}
+.met{background:var(--bg);border-radius:var(--rs);padding:10px;}
+.met-lbl{font-size:10px;color:var(--muted);margin-bottom:3px;}
+.met-val{font-size:20px;font-weight:700;}
+.c-qt{color:var(--qt);}.c-ck{color:var(--ck);}.c-amb{color:var(--amb);}.c-dark{color:var(--dark);}
+
+table{width:100%;border-collapse:collapse;font-size:12px;}
+th{padding:7px 9px;background:var(--qt);color:#fff;font-weight:600;font-size:11px;text-align:left;}
+td{padding:8px 9px;border-bottom:1px solid var(--bd);vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+tr:nth-child(even) td{background:var(--bg);}
+.mini-bar{height:7px;border-radius:99px;background:var(--bg);width:70px;overflow:hidden;display:flex;flex-shrink:0;}
+.mb-qt{background:var(--qt);height:100%;}.mb-ck{background:var(--ck);height:100%;}
+
+.collab-row{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--bg);}
+.collab-name{flex:1;font-size:13px;font-weight:500;}
+.role-badge{font-size:10px;padding:2px 7px;border-radius:99px;font-weight:600;}
+.rb-admin{background:var(--pur-l);color:var(--pur);}.rb-collab{background:var(--qt-l);color:var(--qt-d);}
+
+.chart-wrap{position:relative;height:200px;margin-top:8px;}
+.alert{padding:9px 12px;border-radius:var(--rs);font-size:12px;margin-bottom:10px;}
+.alert-info{background:var(--qt-l);color:var(--qt-d);border:1px solid #B5D4F4;}
+.alert-warn{background:var(--amb-l);color:#633806;border:1px solid #FAEEDA;}
+.alert-ok{background:var(--ck-l);color:var(--ck-d);border:1px solid #C0DD97;}
+
+.live{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:99px;font-size:10px;font-weight:600;}
+.live.on{background:var(--ck-l);color:var(--ck-d);}.live.off{background:var(--bg);color:var(--muted);}
+.pulse{width:6px;height:6px;border-radius:50%;background:var(--ck);animation:pulse 1.2s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.2}}
+
+.flex{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.inp-date{padding:6px 9px;border:1px solid var(--bd);border-radius:var(--rs);font-size:12px;background:var(--white);color:var(--dark);}
+.export-btn{display:inline-flex;align-items:center;gap:5px;padding:7px 12px;border-radius:var(--rs);border:1.5px solid var(--qt);background:var(--white);color:var(--qt);font-size:12px;font-weight:600;cursor:pointer;}
+.export-btn:hover{background:var(--qt-l);}
+@media(max-width:500px){.chrono-grid{grid-template-columns:1fr;}.metrics{grid-template-columns:repeat(2,1fr);}.login-box{width:95vw;}}
+</style>
+</head>
+<body>
+
+<!-- LOGIN — s'ouvre immédiatement, pas de chargement -->
+<div id="screen-login">
+  <div class="login-logo">
+    <span class="logo logo-qt">QUADRA TERRA</span>
+    <span style="color:#D3D1C7;font-size:18px;align-self:center;">·</span>
+    <span class="logo logo-ck">CKOM9</span>
+  </div>
+  <div class="login-box">
+    <div class="login-title">Pointage multi-réseau</div>
+    <div class="login-sub">Connectez-vous avec votre compte Microsoft 365</div>
+    <button class="ms-btn" id="ms-login-btn" onclick="loginMicrosoft()">
+      <svg width="18" height="18" viewBox="0 0 21 21">
+        <rect x="1" y="1" width="9" height="9" fill="#f25022"/>
+        <rect x="11" y="1" width="9" height="9" fill="#7fba00"/>
+        <rect x="1" y="11" width="9" height="9" fill="#00a4ef"/>
+        <rect x="11" y="11" width="9" height="9" fill="#ffb900"/>
+      </svg>
+      Se connecter avec Microsoft
+    </button>
+    <div class="sep-or">ou accès direction</div>
+    <div class="admin-row">
+      <input class="inp" type="password" id="admin-pwd" placeholder="Mot de passe direction" onkeydown="if(event.key==='Enter')loginAdmin()">
+      <button class="btn btn-qt" onclick="loginAdmin()">Entrer</button>
+    </div>
+    <div class="err hidden" id="pwd-err">Mot de passe incorrect</div>
+    <div class="err hidden" id="ms-err" style="margin-top:8px;"></div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="screen-app">
+  <div class="topbar">
+    <div class="topbar-left">
+      <span class="logo logo-qt" style="font-size:10px;">QT</span>
+      <span class="logo logo-ck" style="font-size:10px;">CK</span>
+      <div>
+        <div class="topbar-user" id="top-user"></div>
+        <div class="topbar-date" id="top-date"></div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <div class="sync-dot" id="sync-dot" title="Statut SharePoint"></div>
+      <span class="sync-lbl" id="sync-lbl">—</span>
+      <button class="logout-btn" onclick="logout()">Déconnexion</button>
+    </div>
+  </div>
+  <div class="nav">
+    <button class="nav-btn active" onclick="showPanel('pointage',this)" id="nav-pointage">Pointage</button>
+    <button class="nav-btn" onclick="showPanel('mes-stats',this)" id="nav-stats">Mes statistiques</button>
+    <button class="nav-btn hidden" onclick="showPanel('direction',this)" id="nav-dir">Vue direction</button>
+    <button class="nav-btn hidden" onclick="showPanel('analyse',this)" id="nav-analyse">Analyse</button>
+    <button class="nav-btn hidden" onclick="showPanel('admin',this)" id="nav-admin">Administration</button>
+  </div>
+  <div class="content">
+
+    <div id="panel-pointage" class="panel active">
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+          <div class="card-title" style="margin:0;">Chronomètre</div>
+          <div class="live off" id="live-badge"><div class="pulse" id="pulse" style="display:none"></div><span id="live-txt">Arrêté</span></div>
+        </div>
+        <div class="chrono-grid">
+          <div class="chrono-card cqt" id="crd-qt">
+            <div class="ch-label">Quadra Terra</div>
+            <div class="ch-time" id="ch-qt">00:00:00</div>
+            <button class="ch-btn btn-qt" id="btn-qt" onclick="toggleTimer('QT')">Démarrer</button>
+          </div>
+          <div class="chrono-card cck" id="crd-ck">
+            <div class="ch-label">CKOM9</div>
+            <div class="ch-time" id="ch-ck">00:00:00</div>
+            <button class="ch-btn btn-ck" id="btn-ck" onclick="toggleTimer('CK')">Démarrer</button>
+          </div>
+        </div>
+        <div class="act-bar"><div class="seg-qt" id="bar-qt" style="width:0%"></div><div class="seg-ck" id="bar-ck" style="width:0%"></div></div>
+        <div class="bar-legend">
+          <span><span class="ldot" style="background:var(--qt)"></span>QT : <strong id="leg-qt">0h00</strong></span>
+          <span><span class="ldot" style="background:var(--ck)"></span>CKOM9 : <strong id="leg-ck">0h00</strong></span>
+          <span style="margin-left:auto;font-weight:700;color:var(--dark);">Total : <span id="leg-tot">0h00</span></span>
+        </div>
+      </div>
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+          <div class="card-title" style="margin:0;">Sessions du jour</div>
+          <button class="btn btn-muted" style="font-size:11px;padding:4px 9px;" onclick="clearDay()">Réinitialiser</button>
+        </div>
+        <div class="sess-list" id="sess-list"><div style="text-align:center;color:var(--muted);padding:16px;">Aucune session</div></div>
+      </div>
+    </div>
+
+    <div id="panel-mes-stats" class="panel">
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+          <div class="card-title" style="margin:0;">Mes statistiques</div>
+          <div class="flex">
+            <input class="inp-date" type="date" id="stat-from">
+            <span style="font-size:11px;color:var(--muted);">au</span>
+            <input class="inp-date" type="date" id="stat-to">
+            <button class="btn btn-qt" style="font-size:11px;padding:5px 10px;" onclick="renderMyStats()">OK</button>
+          </div>
+        </div>
+        <div class="metrics" id="my-metrics"></div>
+        <div class="chart-wrap"><canvas id="my-chart"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Détail par jour</div>
+        <table><thead><tr><th>Date</th><th>Quadra Terra</th><th>CKOM9</th><th>Total</th><th>Répartition</th></tr></thead>
+        <tbody id="my-tbody"></tbody></table>
+      </div>
+    </div>
+
+    <div id="panel-direction" class="panel">
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+          <div class="card-title" style="margin:0;">Vue consolidée équipe</div>
+          <div class="flex">
+            <input class="inp-date" type="date" id="dir-from">
+            <span style="font-size:11px;color:var(--muted);">au</span>
+            <input class="inp-date" type="date" id="dir-to">
+            <button class="btn btn-qt" style="font-size:11px;padding:5px 10px;" onclick="renderDirection()">OK</button>
+          </div>
+        </div>
+        <div class="metrics" id="dir-metrics"></div>
+        <table><thead><tr><th>Collaborateur</th><th>QT (h)</th><th>CKOM9 (h)</th><th>Total</th><th>Répartition</th><th>% QT</th></tr></thead>
+        <tbody id="dir-tbody"></tbody></table>
+      </div>
+    </div>
+
+    <div id="panel-analyse" class="panel">
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+          <div class="card-title" style="margin:0;">Analyse globale</div>
+          <div class="flex">
+            <input class="inp-date" type="date" id="ana-from">
+            <span style="font-size:11px;color:var(--muted);">au</span>
+            <input class="inp-date" type="date" id="ana-to">
+            <button class="btn btn-qt" style="font-size:11px;padding:5px 10px;" onclick="renderAnalyse()">OK</button>
+            <button class="export-btn" onclick="exportCSV()">&#8595; Export CSV</button>
+          </div>
+        </div>
+        <div class="metrics" id="ana-metrics"></div>
+        <div class="chart-wrap" style="height:220px;"><canvas id="ana-chart"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Refacturation inter-entités</div>
+        <div class="alert alert-info" style="margin-bottom:10px;">Heures arrondies au quart d'heure · Base de calcul pour refacturation entre Quadra Terra et CKOM9</div>
+        <table><thead><tr><th>Collaborateur</th><th>H. QT</th><th>H. CKOM9</th><th>Total</th><th>% QT</th><th>% CKOM9</th></tr></thead>
+        <tbody id="refact-tbody"></tbody></table>
+      </div>
+    </div>
+
+    <div id="panel-admin" class="panel">
+      <div class="card">
+        <div class="card-title">Gestion des collaborateurs</div>
+        <div class="flex" style="margin-bottom:14px;">
+          <input class="inp" type="text" id="new-collab" placeholder="Nom complet" style="flex:1;max-width:220px;">
+          <select class="inp" id="new-role" style="width:160px;">
+            <option value="collab">Collaborateur</option>
+            <option value="admin">Direction / Admin</option>
+          </select>
+          <button class="btn btn-qt" onclick="addCollab()">Ajouter</button>
+        </div>
+        <div id="collab-list"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Mot de passe direction</div>
+        <div class="flex">
+          <input class="inp" type="password" id="new-pwd" placeholder="Nouveau mot de passe" style="max-width:220px;">
+          <button class="btn btn-qt" onclick="changePwd()">Modifier</button>
+        </div>
+        <div class="err hidden" id="pwd-ok" style="color:var(--ck);">Mis à jour</div>
+      </div>
+      <div class="card">
+        <div class="card-title">SharePoint</div>
+        <div id="sp-detail" class="alert alert-info">En attente...</div>
+        <button class="btn btn-qt" style="margin-top:8px;font-size:11px;" onclick="spConnect()">Reconnecter SharePoint</button>
+      </div>
+      <div class="card">
+        <div class="card-title">Réinitialisation</div>
+        <div class="alert alert-warn">Irréversible — supprime toutes les sessions.</div>
+        <button class="btn btn-red" style="margin-top:8px;" onclick="resetAll()">Supprimer toutes les données</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@azure/msal-browser@3.10.0/lib/msal-browser.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+// ══ CONFIG ════════════════════════════════════════════════════
+const CFG = {
+  clientId: "0d495941-ea34-41d3-b23f-6ace5602a9b1",
+  tenantId: "cf78c512-7658-41eb-96ab-444dc28c75a9",
+  // URL propre du fichier déposé dans SharePoint
+  redirectUri: "https://quadraterradev.sharepoint.com/sites/Compteurs/Shared%20Documents/Appli/pointage_sharepoint.html",
+  siteHostname: "quadraterradev.sharepoint.com",
+  sitePath: "/sites/Compteurs",
+  listName: "PointageSessions"
+};
+
+// ══ MSAL ══════════════════════════════════════════════════════
+const msalInst = new msal.PublicClientApplication({
+  auth: { clientId: CFG.clientId, authority: `https://login.microsoftonline.com/${CFG.tenantId}`, redirectUri: CFG.redirectUri },
+  cache: { cacheLocation:"localStorage", storeAuthStateInCookie:true }
+});
+
+// ══ ÉTAT LOCAL (config collabs uniquement) ════════════════════
+const LS = 'qt_cfg_v5';
+let CFG_LOCAL = {
+  collabs:[
+    {name:"Marie Dupont",role:"collab"},{name:"Pierre Martin",role:"collab"},
+    {name:"Sophie Lefèvre",role:"collab"},{name:"Thomas Bernard",role:"collab"},
+    {name:"Céline Rousseau",role:"collab"},{name:"Julien Moreau",role:"collab"},
+    {name:"Isabelle Petit",role:"admin"},{name:"Nicolas Garnier",role:"collab"},
+    {name:"Laure Simon",role:"collab"},{name:"Marc Fontaine",role:"collab"},
+    {name:"Anaïs Chevalier",role:"collab"},{name:"Romain Leclerc",role:"collab"}
+  ],
+  adminPwd:"direction2026"
+};
+function loadCfg(){try{const d=localStorage.getItem(LS);if(d)CFG_LOCAL=JSON.parse(d);}catch(e){}}
+function saveCfg(){try{localStorage.setItem(LS,JSON.stringify(CFG_LOCAL));}catch(e){}}
+
+// ══ GRAPH API ══════════════════════════════════════════════════
+const GRAPH = "https://graph.microsoft.com/v1.0";
+let spSiteId=null, spListId=null, spReady=false;
+let msAccount=null;
+
+async function getToken(){
+  const accounts=msalInst.getAllAccounts();
+  if(!accounts.length) throw new Error("Non connecté");
+  try{
+    const r=await msalInst.acquireTokenSilent({scopes:["Sites.ReadWrite.All","User.Read"],account:accounts[0]});
+    return r.accessToken;
+  }catch(e){
+    const r=await msalInst.acquireTokenPopup({scopes:["Sites.ReadWrite.All","User.Read"]});
+    return r.accessToken;
+  }
+}
+
+async function gGet(path){
+  const tok=await getToken();
+  const r=await fetch(GRAPH+path,{headers:{Authorization:"Bearer "+tok}});
+  if(!r.ok) throw new Error(r.status);
+  return r.json();
+}
+async function gPost(path,body){
+  const tok=await getToken();
+  const r=await fetch(GRAPH+path,{method:"POST",headers:{Authorization:"Bearer "+tok,"Content-Type":"application/json"},body:JSON.stringify(body)});
+  if(!r.ok) throw new Error(r.status);
+  return r.json();
+}
+async function gDel(path){
+  const tok=await getToken();
+  await fetch(GRAPH+path,{method:"DELETE",headers:{Authorization:"Bearer "+tok}});
+}
+
+// Connexion SP en arrière-plan (non bloquante)
+async function spConnect(){
+  setSyncStatus("sync","Synchro...");
+  try{
+    const site=await gGet(`/sites/${CFG.siteHostname}:${CFG.sitePath}`);
+    spSiteId=site.id;
+    const lists=await gGet(`/sites/${spSiteId}/lists?$filter=displayName eq '${CFG.listName}'`);
+    if(lists.value.length===0){
+      await gPost(`/sites/${spSiteId}/lists`,{
+        displayName:CFG.listName,
+        columns:[
+          {name:"UserName",text:{}},{name:"Network",text:{}},
+          {name:"StartTime",text:{}},{name:"EndTime",text:{}},
+          {name:"DurationMs",number:{}},{name:"DurationRounded",number:{}},
+          {name:"SessionDate",text:{}}
+        ],
+        list:{template:"genericList"}
+      });
+      const lists2=await gGet(`/sites/${spSiteId}/lists?$filter=displayName eq '${CFG.listName}'`);
+      spListId=lists2.value[0].id;
+    }else{
+      spListId=lists.value[0].id;
+    }
+    spReady=true;
+    setSyncStatus("ok","SharePoint OK");
+    if(isAdmin){
+      const el=document.getElementById('sp-detail');
+      if(el){el.textContent="Connecté · Liste "+CFG.listName+" opérationnelle";el.className='alert alert-ok';}
+    }
+  }catch(e){
+    spReady=false;
+    setSyncStatus("err","SP hors ligne");
+    console.warn("SP:",e.message);
+  }
+}
+
+async function spSave(s){
+  if(!spReady)return;
+  try{
+    await gPost(`/sites/${spSiteId}/lists/${spListId}/items`,{
+      fields:{UserName:s.user,Network:s.network,StartTime:s.start,EndTime:s.end,DurationMs:s.ms,DurationRounded:s.msR,SessionDate:s.date}
+    });
+  }catch(e){setSyncStatus("err","Erreur sync");}
+}
+
+async function spLoad(from,to,user){
+  if(!spReady)return[];
+  try{
+    let f=`fields/SessionDate ge '${from}' and fields/SessionDate le '${to}'`;
+    if(user) f+=` and fields/UserName eq '${user}'`;
+    const r=await gGet(`/sites/${spSiteId}/lists/${spListId}/items?$expand=fields&$filter=${encodeURIComponent(f)}&$top=5000`);
+    return r.value.map(i=>({spId:i.id,user:i.fields.UserName,network:i.fields.Network,start:i.fields.StartTime,end:i.fields.EndTime,ms:i.fields.DurationMs,msR:i.fields.DurationRounded,date:i.fields.SessionDate}));
+  }catch(e){return[];}
+}
+
+async function spDel(spId){
+  if(!spReady||!spId)return;
+  try{await gDel(`/sites/${spSiteId}/lists/${spListId}/items/${spId}`);}catch(e){}
+}
+
+async function spDelAll(){
+  if(!spReady)return;
+  try{
+    const r=await gGet(`/sites/${spSiteId}/lists/${spListId}/items?$top=5000`);
+    for(const i of r.value) await gDel(`/sites/${spSiteId}/lists/${spListId}/items/${i.id}`);
+  }catch(e){}
+}
+
+function setSyncStatus(state,txt){
+  const d=document.getElementById('sync-dot'),l=document.getElementById('sync-lbl');
+  if(d){d.className='sync-dot '+state;}
+  if(l) l.textContent=txt;
+}
+
+// ══ HELPERS ════════════════════════════════════════════════════
+function fmtMs(ms){const t=Math.floor(ms/1000),h=Math.floor(t/3600),m=Math.floor((t%3600)/60),s=t%60;return`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;}
+function fmtHM(ms){const t=Math.floor(ms/60000);return`${Math.floor(t/60)}h${String(t%60).padStart(2,'0')}`;}
+function toH(ms){return Math.round(ms/3600000*100)/100;}
+function roundQ(ms){const q=15*60*1000;return Math.round(ms/q)*q;}
+function today(){return new Date().toISOString().split('T')[0];}
+function fmtTime(iso){return new Date(iso).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});}
+function firstOfMonth(){const n=new Date();return new Date(n.getFullYear(),n.getMonth(),1).toISOString().split('T')[0];}
+function dateRange(from,to){const d=[],c=new Date(from);while(c<=new Date(to)){d.push(c.toISOString().split('T')[0]);c.setDate(c.getDate()+1);}return d;}
+
+// ══ RUNTIME ════════════════════════════════════════════════════
+let currentUser=null,isAdmin=false;
+let activeNet=null,sessStart=null,tickInt=null;
+let todaySess=[];
+let myChart=null,anaChart=null;
+
+// ══ INIT — s'ouvre immédiatement, SP en arrière-plan ══════════
+async function init(){
+  loadCfg();
+  // Page s'ouvre tout de suite
+  document.getElementById('screen-login').style.display='flex';
+  // MSAL s'initialise sans bloquer
+  try{
+    await msalInst.initialize();
+    await msalInst.handleRedirectPromise();
+    const accounts=msalInst.getAllAccounts();
+    if(accounts.length>0){
+      msAccount=accounts[0];
+      enterWithMs(msAccount);
+    }
+  }catch(e){console.warn("MSAL:",e.message);}
+}
+
+function enterWithMs(account){
+  const name=account.name||account.username.split('@')[0];
+  const matched=CFG_LOCAL.collabs.find(c=>c.name.toLowerCase()===name.toLowerCase());
+  currentUser=matched?matched.name:name;
+  isAdmin=matched?matched.role==='admin':false;
+  showApp();
+  // SP en arrière-plan après que l'app soit visible
+  setTimeout(()=>spConnect(),500);
+}
+
+// ══ LOGIN ══════════════════════════════════════════════════════
+async function loginMicrosoft(){
+  const btn=document.getElementById('ms-login-btn');
+  btn.disabled=true; btn.textContent="Connexion...";
+  document.getElementById('ms-err').classList.add('hidden');
+  try{
+    const r=await msalInst.loginPopup({scopes:["User.Read","Sites.ReadWrite.All"]});
+    msAccount=r.account;
+    enterWithMs(msAccount);
+  }catch(e){
+    btn.disabled=false;
+    btn.innerHTML='<svg width="18" height="18" viewBox="0 0 21 21"><rect x="1" y="1" width="9" height="9" fill="#f25022"/><rect x="11" y="1" width="9" height="9" fill="#7fba00"/><rect x="1" y="11" width="9" height="9" fill="#00a4ef"/><rect x="11" y="11" width="9" height="9" fill="#ffb900"/></svg> Se connecter avec Microsoft';
+    if(e.message&&!e.message.includes('cancelled')){
+      document.getElementById('ms-err').textContent="Erreur : "+e.message;
+      document.getElementById('ms-err').classList.remove('hidden');
+    }
+  }
+}
+
+function loginAdmin(){
+  const p=document.getElementById('admin-pwd').value;
+  if(p===CFG_LOCAL.adminPwd){
+    currentUser='Direction';isAdmin=true;msAccount=null;
+    showApp();
+    setTimeout(()=>spConnect(),500);
+  }else{
+    document.getElementById('pwd-err').classList.remove('hidden');
+  }
+}
+
+function showApp(){
+  document.getElementById('screen-login').style.display='none';
+  document.getElementById('screen-app').style.display='flex';
+  document.getElementById('top-user').textContent=currentUser+(isAdmin?' · Admin':'');
+  document.getElementById('top-date').textContent=new Date().toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  ['nav-dir','nav-analyse','nav-admin'].forEach(id=>document.getElementById(id).classList.toggle('hidden',!isAdmin));
+  if(currentUser==='Direction'){
+    document.getElementById('nav-pointage').classList.add('hidden');
+    document.getElementById('nav-stats').classList.add('hidden');
+    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+    document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+    document.getElementById('panel-direction').classList.add('active');
+    document.getElementById('nav-dir').classList.remove('hidden');
+    document.getElementById('nav-dir').classList.add('active');
+    document.getElementById('dir-from').value=firstOfMonth();
+    document.getElementById('dir-to').value=today();
+  }else{
+    document.getElementById('stat-from').value=firstOfMonth();
+    document.getElementById('stat-to').value=today();
+    // Charger sessions du jour en arrière-plan
+    loadTodaySessions();
+  }
+  document.getElementById('ana-from').value=firstOfMonth();
+  document.getElementById('ana-to').value=today();
+  if(isAdmin)renderAdmin();
+}
+
+function logout(){
+  stopTimer();
+  if(msAccount){try{msalInst.logoutPopup();}catch(e){}msAccount=null;}
+  currentUser=null;isAdmin=false;activeNet=null;todaySess=[];spReady=false;spSiteId=null;spListId=null;
+  document.getElementById('admin-pwd').value='';
+  document.getElementById('pwd-err').classList.add('hidden');
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('panel-pointage').classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('nav-pointage').classList.remove('hidden');
+  document.getElementById('nav-stats').classList.remove('hidden');
+  document.getElementById('nav-pointage').classList.add('active');
+  setSyncStatus("","—");
+  document.getElementById('screen-app').style.display='none';
+  document.getElementById('screen-login').style.display='flex';
+  const btn=document.getElementById('ms-login-btn');
+  btn.disabled=false;
+  btn.innerHTML='<svg width="18" height="18" viewBox="0 0 21 21"><rect x="1" y="1" width="9" height="9" fill="#f25022"/><rect x="11" y="1" width="9" height="9" fill="#7fba00"/><rect x="1" y="11" width="9" height="9" fill="#00a4ef"/><rect x="11" y="11" width="9" height="9" fill="#ffb900"/></svg> Se connecter avec Microsoft';
+}
+
+function showPanel(id,btn){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');
+  btn.classList.add('active');
+  if(id==='direction')renderDirection();
+  if(id==='analyse')renderAnalyse();
+  if(id==='mes-stats')renderMyStats();
+  if(id==='admin')renderAdmin();
+}
+
+// ══ POINTAGE ══════════════════════════════════════════════════
+async function loadTodaySessions(){
+  // Attendre que SP soit prêt (max 5s)
+  let tries=0;
+  while(!spReady&&tries<10){await new Promise(r=>setTimeout(r,500));tries++;}
+  todaySess=await spLoad(today(),today(),currentUser);
+  updateChronoDisplay();renderSessions();
+}
+
+function toggleTimer(net){if(activeNet===net)stopTimer();else{if(activeNet)stopTimer();startTimer(net);}}
+
+function startTimer(net){
+  activeNet=net;sessStart=new Date().toISOString();
+  document.getElementById('live-badge').className='live on';
+  document.getElementById('pulse').style.display='block';
+  document.getElementById('live-txt').textContent='En cours — '+(net==='QT'?'Quadra Terra':'CKOM9');
+  updateBtns();
+  clearInterval(tickInt);
+  tickInt=setInterval(()=>{
+    const el=Date.now()-new Date(sessStart);
+    document.getElementById(activeNet==='QT'?'ch-qt':'ch-ck').textContent=fmtMs(msOfDay(activeNet)+el);
+    updateBar();
+  },1000);
+}
+
+async function stopTimer(){
+  if(!activeNet||!sessStart)return;
+  const end=new Date().toISOString(),ms=new Date(end)-new Date(sessStart);
+  clearInterval(tickInt);
+  if(ms>30000){
+    const s={user:currentUser,network:activeNet,start:sessStart,end,ms,msR:roundQ(ms),date:today()};
+    todaySess.push(s);
+    await spSave(s); // sauvegarde en arrière-plan
+  }
+  activeNet=null;sessStart=null;
+  updateBtns();updateChronoDisplay();renderSessions();
+  document.getElementById('live-badge').className='live off';
+  document.getElementById('pulse').style.display='none';
+  document.getElementById('live-txt').textContent='Arrêté';
+}
+
+function msOfDay(net){return todaySess.filter(s=>s.network===net).reduce((a,s)=>a+s.ms,0);}
+
+function updateBtns(){
+  const bq=document.getElementById('btn-qt'),bc=document.getElementById('btn-ck');
+  const cq=document.getElementById('crd-qt'),cc=document.getElementById('crd-ck');
+  if(activeNet==='QT'){bq.textContent='Arrêter QT';bq.className='ch-btn btn-red';bc.textContent='Basculer → CKOM9';bc.className='ch-btn btn-ck';cq.classList.remove('inactive');cc.classList.add('inactive');}
+  else if(activeNet==='CK'){bc.textContent='Arrêter CKOM9';bc.className='ch-btn btn-red';bq.textContent='Basculer → QT';bq.className='ch-btn btn-qt';cc.classList.remove('inactive');cq.classList.add('inactive');}
+  else{bq.textContent='Démarrer';bq.className='ch-btn btn-qt';bc.textContent='Démarrer';bc.className='ch-btn btn-ck';cq.classList.remove('inactive');cc.classList.remove('inactive');}
+}
+
+function updateChronoDisplay(){
+  if(activeNet!=='QT')document.getElementById('ch-qt').textContent=fmtMs(msOfDay('QT'));
+  if(activeNet!=='CK')document.getElementById('ch-ck').textContent=fmtMs(msOfDay('CK'));
+  updateBar();
+}
+
+function updateBar(){
+  let qt=msOfDay('QT'),ck=msOfDay('CK');
+  if(activeNet==='QT')qt+=Date.now()-new Date(sessStart);
+  if(activeNet==='CK')ck+=Date.now()-new Date(sessStart);
+  const tot=qt+ck,pq=tot?Math.round(qt/tot*100):0;
+  document.getElementById('bar-qt').style.width=pq+'%';
+  document.getElementById('bar-ck').style.width=(100-pq)+'%';
+  document.getElementById('leg-qt').textContent=fmtHM(qt);
+  document.getElementById('leg-ck').textContent=fmtHM(ck);
+  document.getElementById('leg-tot').textContent=fmtHM(tot);
+}
+
+function renderSessions(){
+  const el=document.getElementById('sess-list');
+  if(!todaySess.length){el.innerHTML='<div style="text-align:center;color:var(--muted);padding:16px;">Aucune session</div>';return;}
+  el.innerHTML=todaySess.map((x,i)=>`
+    <div class="sess-row">
+      <span class="sbadge ${x.network==='QT'?'bqt':'bck'}">${x.network==='QT'?'Quadra Terra':'CKOM9'}</span>
+      <span style="color:var(--muted);flex:1;">${fmtTime(x.start)} → ${fmtTime(x.end)}</span>
+      <span style="font-weight:700;">${fmtHM(x.msR)}</span>
+      <button class="sdel" onclick="delSession(${i})">×</button>
+    </div>`).join('');
+}
+
+async function delSession(i){
+  const s=todaySess[i];
+  if(s.spId)await spDel(s.spId);
+  todaySess.splice(i,1);
+  renderSessions();updateChronoDisplay();
+}
+
+async function clearDay(){
+  if(!confirm('Supprimer les sessions du jour ?'))return;
+  for(const s of todaySess)if(s.spId)await spDel(s.spId);
+  todaySess=[];renderSessions();updateChronoDisplay();
+}
+
+// ══ MES STATS ══════════════════════════════════════════════════
+async function renderMyStats(){
+  const from=document.getElementById('stat-from').value,to=document.getElementById('stat-to').value;
+  setSyncStatus("sync","Chargement...");
+  const sessions=await spLoad(from,to,currentUser);
+  setSyncStatus("ok","SharePoint OK");
+  const days=dateRange(from,to);
+  let tQt=0,tCk=0;
+  const dd=days.map(d=>{
+    const qt=sessions.filter(s=>s.network==='QT'&&s.date===d).reduce((a,s)=>a+s.msR,0);
+    const ck=sessions.filter(s=>s.network==='CK'&&s.date===d).reduce((a,s)=>a+s.msR,0);
+    tQt+=qt;tCk+=ck;return{d,qt,ck};
+  }).filter(x=>x.qt+x.ck>0);
+  const tot=tQt+tCk;
+  document.getElementById('my-metrics').innerHTML=`
+    <div class="met"><div class="met-lbl">Quadra Terra</div><div class="met-val c-qt">${fmtHM(tQt)}</div></div>
+    <div class="met"><div class="met-lbl">CKOM9</div><div class="met-val c-ck">${fmtHM(tCk)}</div></div>
+    <div class="met"><div class="met-lbl">Total période</div><div class="met-val c-dark">${fmtHM(tot)}</div></div>
+    <div class="met"><div class="met-lbl">% Quadra Terra</div><div class="met-val c-amb">${tot?Math.round(tQt/tot*100):0}%</div></div>`;
+  document.getElementById('my-tbody').innerHTML=dd.map(x=>{
+    const t=x.qt+x.ck,pq=t?Math.round(x.qt/t*100):0;
+    return`<tr><td>${new Date(x.d).toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short'})}</td><td style="color:var(--qt);font-weight:600;">${fmtHM(x.qt)}</td><td style="color:var(--ck);font-weight:600;">${fmtHM(x.ck)}</td><td style="font-weight:700;">${fmtHM(t)}</td><td><div style="display:flex;align-items:center;gap:6px;"><div class="mini-bar"><div class="mb-qt" style="width:${pq}%"></div></div><span style="font-size:11px;color:var(--muted);">${pq}% QT</span></div></td></tr>`;
+  }).join('')||'<tr><td colspan="5" style="text-align:center;color:var(--muted);">Aucune donnée</td></tr>';
+  if(myChart)myChart.destroy();
+  const last=dd.slice(-14);
+  myChart=new Chart(document.getElementById('my-chart').getContext('2d'),{type:'bar',data:{labels:last.map(x=>new Date(x.d).toLocaleDateString('fr-FR',{day:'numeric',month:'short'})),datasets:[{label:'Quadra Terra',data:last.map(x=>toH(x.qt)),backgroundColor:'#185FA5'},{label:'CKOM9',data:last.map(x=>toH(x.ck)),backgroundColor:'#3B6D11'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top'}},scales:{x:{stacked:true,ticks:{maxRotation:45}},y:{stacked:true,title:{display:true,text:'Heures'}}}}});
+}
+
+// ══ DIRECTION ══════════════════════════════════════════════════
+async function renderDirection(){
+  const from=document.getElementById('dir-from').value||firstOfMonth(),to=document.getElementById('dir-to').value||today();
+  setSyncStatus("sync","Chargement...");
+  const sessions=await spLoad(from,to,null);
+  setSyncStatus("ok","SharePoint OK");
+  let tQt=0,tCk=0,actifs=0;
+  const rows=CFG_LOCAL.collabs.map(c=>{
+    const qt=sessions.filter(s=>s.user===c.name&&s.network==='QT').reduce((a,s)=>a+s.msR,0);
+    const ck=sessions.filter(s=>s.user===c.name&&s.network==='CK').reduce((a,s)=>a+s.msR,0);
+    tQt+=qt;tCk+=ck;if(qt+ck>0)actifs++;
+    const tot=qt+ck,pq=tot?Math.round(qt/tot*100):0;
+    if(!tot)return`<tr><td style="font-weight:600;">${c.name}</td><td colspan="5" style="color:var(--muted);">Pas de pointage</td></tr>`;
+    return`<tr><td style="font-weight:600;">${c.name}</td><td style="color:var(--qt);font-weight:600;">${toH(qt)}h</td><td style="color:var(--ck);font-weight:600;">${toH(ck)}h</td><td style="font-weight:700;">${toH(qt+ck)}h</td><td><div style="display:flex;align-items:center;gap:6px;"><div class="mini-bar"><div class="mb-qt" style="width:${pq}%"></div></div><span style="font-size:11px;color:var(--muted);">${pq}%</span></div></td><td style="font-weight:700;color:var(--amb);">${pq}%</td></tr>`;
+  });
+  const tot=tQt+tCk;
+  document.getElementById('dir-metrics').innerHTML=`
+    <div class="met"><div class="met-lbl">Collaborateurs actifs</div><div class="met-val c-dark">${actifs}</div></div>
+    <div class="met"><div class="met-lbl">Total Quadra Terra</div><div class="met-val c-qt">${toH(tQt)}h</div></div>
+    <div class="met"><div class="met-lbl">Total CKOM9</div><div class="met-val c-ck">${toH(tCk)}h</div></div>
+    <div class="met"><div class="met-lbl">% QT global</div><div class="met-val c-amb">${tot?Math.round(tQt/tot*100):0}%</div></div>`;
+  document.getElementById('dir-tbody').innerHTML=rows.join('');
+}
+
+// ══ ANALYSE ════════════════════════════════════════════════════
+async function renderAnalyse(){
+  const from=document.getElementById('ana-from').value||firstOfMonth(),to=document.getElementById('ana-to').value||today();
+  setSyncStatus("sync","Chargement...");
+  const sessions=await spLoad(from,to,null);
+  setSyncStatus("ok","SharePoint OK");
+  let tQt=0,tCk=0;
+  const dayMap={};
+  sessions.forEach(s=>{
+    if(s.network==='QT')tQt+=s.msR;else tCk+=s.msR;
+    if(!dayMap[s.date])dayMap[s.date]={qt:0,ck:0};
+    if(s.network==='QT')dayMap[s.date].qt+=s.msR;else dayMap[s.date].ck+=s.msR;
+  });
+  const tot=tQt+tCk;
+  document.getElementById('ana-metrics').innerHTML=`
+    <div class="met"><div class="met-lbl">Sessions</div><div class="met-val c-dark">${sessions.length}</div></div>
+    <div class="met"><div class="met-lbl">Total QT</div><div class="met-val c-qt">${toH(tQt)}h</div></div>
+    <div class="met"><div class="met-lbl">Total CKOM9</div><div class="met-val c-ck">${toH(tCk)}h</div></div>
+    <div class="met"><div class="met-lbl">% QT</div><div class="met-val c-amb">${tot?Math.round(tQt/tot*100):0}%</div></div>`;
+  if(anaChart)anaChart.destroy();
+  const sd=Object.keys(dayMap).sort();
+  anaChart=new Chart(document.getElementById('ana-chart').getContext('2d'),{type:'bar',data:{labels:sd.map(d=>new Date(d).toLocaleDateString('fr-FR',{day:'numeric',month:'short'})),datasets:[{label:'Quadra Terra',data:sd.map(d=>toH(dayMap[d].qt)),backgroundColor:'#185FA5'},{label:'CKOM9',data:sd.map(d=>toH(dayMap[d].ck)),backgroundColor:'#3B6D11'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top'}},scales:{x:{stacked:true,ticks:{maxRotation:45}},y:{stacked:true,title:{display:true,text:'Heures'}}}}});
+  document.getElementById('refact-tbody').innerHTML=CFG_LOCAL.collabs.map(c=>{
+    const qt=sessions.filter(s=>s.user===c.name&&s.network==='QT').reduce((a,s)=>a+s.msR,0);
+    const ck=sessions.filter(s=>s.user===c.name&&s.network==='CK').reduce((a,s)=>a+s.msR,0);
+    const t=qt+ck;if(!t)return'';
+    const pq=Math.round(qt/t*100);
+    return`<tr><td style="font-weight:600;">${c.name}</td><td style="color:var(--qt);font-weight:600;">${toH(qt)}</td><td style="color:var(--ck);font-weight:600;">${toH(ck)}</td><td style="font-weight:700;">${toH(t)}</td><td style="color:var(--qt);">${pq}%</td><td style="color:var(--ck);">${100-pq}%</td></tr>`;
+  }).join('')||'<tr><td colspan="6" style="text-align:center;color:var(--muted);">Aucune donnée</td></tr>';
+}
+
+async function exportCSV(){
+  const from=document.getElementById('ana-from').value,to=document.getElementById('ana-to').value;
+  const sessions=await spLoad(from,to,null);
+  const rows=['Collaborateur,Réseau,Date,Début,Fin,Durée_h'];
+  sessions.forEach(s=>rows.push(`"${s.user}","${s.network==='QT'?'Quadra Terra':'CKOM9'}","${s.date}","${fmtTime(s.start)}","${fmtTime(s.end)}","${toH(s.msR)}"`));
+  const blob=new Blob([rows.join('\n')],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download=`pointage_${from}_${to}.csv`;a.click();URL.revokeObjectURL(url);
+}
+
+// ══ ADMIN ══════════════════════════════════════════════════════
+function renderAdmin(){
+  document.getElementById('collab-list').innerHTML=CFG_LOCAL.collabs.map((c,i)=>`
+    <div class="collab-row">
+      <span class="collab-name">${c.name}</span>
+      <span class="role-badge ${c.role==='admin'?'rb-admin':'rb-collab'}">${c.role==='admin'?'Direction':'Collaborateur'}</span>
+      <button class="btn btn-muted" style="font-size:11px;padding:3px 8px;" onclick="toggleRole(${i})">${c.role==='admin'?'→ Collab':'→ Admin'}</button>
+      <button class="btn btn-red" style="font-size:11px;padding:3px 8px;" onclick="removeCollab(${i})">Supprimer</button>
+    </div>`).join('');
+}
+function addCollab(){
+  const name=document.getElementById('new-collab').value.trim(),role=document.getElementById('new-role').value;
+  if(!name)return;
+  CFG_LOCAL.collabs.push({name,role});saveCfg();renderAdmin();
+  document.getElementById('new-collab').value='';
+}
+function removeCollab(i){if(!confirm('Supprimer '+CFG_LOCAL.collabs[i].name+' ?'))return;CFG_LOCAL.collabs.splice(i,1);saveCfg();renderAdmin();}
+function toggleRole(i){CFG_LOCAL.collabs[i].role=CFG_LOCAL.collabs[i].role==='admin'?'collab':'admin';saveCfg();renderAdmin();}
+function changePwd(){
+  const p=document.getElementById('new-pwd').value;if(!p)return;
+  CFG_LOCAL.adminPwd=p;saveCfg();
+  const ok=document.getElementById('pwd-ok');ok.classList.remove('hidden');
+  setTimeout(()=>ok.classList.add('hidden'),2500);
+  document.getElementById('new-pwd').value='';
+}
+async function resetAll(){
+  if(!confirm('SUPPRIMER toutes les sessions SharePoint ? Irréversible.'))return;
+  await spDelAll();todaySess=[];renderSessions();updateChronoDisplay();
+  alert('Données supprimées.');
+}
+
+// ══ GO ═════════════════════════════════════════════════════════
+init();
+</script>
+</body>
+</html>
